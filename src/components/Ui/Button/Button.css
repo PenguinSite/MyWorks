@@ -1,0 +1,47 @@
+.Button {
+	padding: 10px 40px;
+ 	margin: 0px 10px 10px 0px;
+  	float: left;
+	border-radius: 10px;
+	font-family: 'Open-sans', sans-serif;
+	font-size: 1.6rem;
+	color: #FFF;
+	outline: none;
+	border: none;
+	transition: all 0.1s;
+	-webkit-transition: all 0.1s;
+}
+.Button:hover {
+	cursor: pointer;
+}
+.Button:disabled {
+	background: #ccc;
+	color: #000;
+	cursor: not-allowed;
+}
+.Button.error {
+  background-color: #E74C3C;
+	border-bottom: 5px solid #BD3E31;
+}
+.Button.error:active {
+	border-bottom: 0px solid #BD3E31;
+}
+.Button.primary {
+  background-color: #3498DB;
+	border-bottom: 5px solid #2980B9;
+}
+.Button.primary:active {
+	border-bottom: 0px solid #2980B9;
+}
+.Button.success {
+  background-color: #82BF56;
+	border-bottom: 5px solid #669644;
+}
+.Button.success:active {
+	border-bottom: 0px solid #669644;
+}
+.Button:active {
+	transform: translate(0px,5px);
+  -webkit-transform: translate(0px,5px);
+	outline: none;
+}
