@@ -4,35 +4,46 @@ import Button from '../../components/Ui/Button/Button'
 import Input from '../../components/Ui/Input/Input'
 import {connect} from "react-redux";
 import {auth} from "../../store/actions/auth";
-import {reduxForm, Field} from "redux-form";
 import {NavLink} from "react-router-dom";
-import {minLength8, required, validateEmail} from "../../validators/validators";
+import { Formik, Form, Field } from 'formik';
 
-const AuthBefore = (props) => {
+const Auth = () => {
     return (
         <div className='Auth'>
             <div>
                 <h1>Авторизация</h1>
-                <form className="AuthForm" onSubmit={props.handleSubmit}>
-                    <Field type={"text"} label={"email"} name={'email'} component={Input} validate={[required, validateEmail]}></Field>
-                    <Field type={"password"} label={"password"} name={'password'} component={Input} validate={[required, minLength8]}></Field>
-                    <div className={'formDescription'}>if you don’t have an account, you can create one <NavLink to={'/registration'}>here</NavLink></div>
-                    <Button type="success">Войти</Button>
-                </form>
+                <Formik
+                    initialValues={{ email: '', password: '' }}
+                    validate={values => {
+                        const errors = {};
+                        if (!values.email) {
+                            errors.email = 'Required';
+                        } else if (
+                            !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)
+                        ) {
+                            errors.email = 'Invalid email address';
+                        }
+                        return errors;
+                    }}
+                    onSubmit={(values, { setSubmitting }) => {
+                        setTimeout(() => {
+                            alert(JSON.stringify(values, null, 2));
+                            setSubmitting(false);
+                        }, 400);
+                    }}
+                >
+                    {({ isSubmitting }) => (
+                        <Form className="AuthForm">
+                            <Field type={"email"} label={"email"} name={'email'} component={Input}></Field>
+                            <Field type={"password"} label={"password"} name={'password'} component={Input}></Field>
+                            <div className={'formDescription'}>if you don’t have an account, you can create one <NavLink to={'/registration'}>here</NavLink></div>
+                            <Button uiType="success" type={"submit"} disabled={isSubmitting}>Войти</Button>
+                        </Form>
+                    )}
+                </Formik>
             </div>
         </div>
     )
-}
-
-const AuthReduxForm = reduxForm({
-    form: 'auth'
-})(AuthBefore)
-
-const Auth = (props) => {
-    const onSubmit = (formData) => {
-        console.log(formData)
-    }
-    return <AuthReduxForm onSubmit={onSubmit}/>
 }
 
 export default connect(null, {auth})(Auth)

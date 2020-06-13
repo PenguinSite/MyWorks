@@ -1,21 +1,17 @@
 import React from 'react'
 import './Input.css'
 
-const Input = ({input, meta, ...props}) => {
-	const inputType = props.type || 'text'
+const Input = ({field, form, ...props}) => {
 	const cls = ['Input']
-	const htmlFor = `${inputType}-${Math.random()}`
 	return (
 		<div className={cls.join(' ')}>
-			<label htmlFor={htmlFor}>{props.label}</label>
+			<label htmlFor={field.name}>{props.label}</label>
 			<input
-				type={inputType}
-				id={htmlFor}
+				id={field.name}
 				value={props.value}
-				{...props} {...input}
+				{...props} {...field}
 			/>
-			{meta.error && meta.touched ? <span style={{color: 'red'}}>{meta.error}</span> : null}
-
+			{form.errors && form.errors[field.name] ? <span style={{color: 'red'}}>{form.errors[field.name]}</span> : null}
 		</div>
 	)
 }

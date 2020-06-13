@@ -1,11 +1,11 @@
 import React from 'react'
 import './Select.css'
 
-const Select = ({input, meta, ...props}) => {
+const Select = ({field, ...props}) => {
 	return (
 		<div className="Select">
 			<label htmlFor="htmlFor">{props.label}</label>
-			<select {...props} {...input}>{props.children}</select>
+			<select {...props} {...field}>{props.children}</select>
 		</div>
 	)
 }

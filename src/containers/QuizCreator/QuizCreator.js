@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react'
+import React, {useState} from 'react'
 import './QuizCreator.css'
 import Button from '../../components/Ui/Button/Button'
 import Input from '../../components/Ui/Input/Input'
@@ -6,28 +6,49 @@ import Select from '../../components/Ui/Select/Select'
 import {connect} from 'react-redux'
 import {createQuizQuestion, finishCreateQuiz} from '../../store/actions/create'
 import Loader from '../../components/Ui/Loader/Loader'
-import {Field, reduxForm} from 'redux-form'
-import {required} from "../../validators/validators";
+import { Formik, Form, Field } from 'formik';
 import {NavLink} from "react-router-dom";
 
-const QuizCreatorBefore = ({createQuizQuestion, finishCreateQuiz, ...props}) => {
+const QuizCreator = ({createQuizQuestion, finishCreateQuiz, ...props}) => {
     let [numberOfAnswers, setNumberOfAnswers] = useState(2)
-    let [typeRequest, setTypeRequest] = useState(null)
     let [successAddTest, setSuccessAddTest] = useState(false)
 
-    useEffect(() => {
-        if (typeRequest === 'add' && props.data) {
-            createQuizQuestion(props.data)
-            props.destroy('quizCreator')
-            setNumberOfAnswers(2)
+    const initialValues = {question: '', Answer1: '', Answer2: '', Answer3: '',
+        Answer4: '', Answer5: '', Answer6: '', Answer7: ''}
+
+    const onSubmit = (values, resetForm, typeRequest) => {
+        let newFormData = {}
+        newFormData.answers = []
+        for (let item in values) {
+            if (typeof values[item] === 'string') {
+                switch(item) {
+                    case 'question':
+                        newFormData[item] = values[item]
+                        break;
+                    case 'rightAnswerId':
+                        newFormData[item] = +values[item]
+                        break;
+                    default:
+                        let id = item.slice(-1)
+                        if (id <= numberOfAnswers) {
+                            newFormData.answers.push({id: id, text: values[item]})
+                        }
+                }
+            }
         }
-        if (typeRequest === 'create' && props.data) {
-            finishCreateQuiz(props.data)
-            props.destroy('quizCreator')
+        newFormData.id = props.quiz.length + 1
+        if (!newFormData.rightAnswerId) {
+            newFormData.rightAnswerId = 1
+        }
+        resetForm(initialValues);
+        if (typeRequest === 'add') {
+            createQuizQuestion(newFormData)
+            setNumberOfAnswers(2)
+        } else if (typeRequest === 'create') {
+            finishCreateQuiz(newFormData)
             setSuccessAddTest(true)
         }
-        setTypeRequest(null)
-    }, [props.data])
+    }
 
     function addAnswerHandler(e) {
         e.preventDefault()
@@ -35,20 +56,11 @@ const QuizCreatorBefore = ({createQuizQuestion, finishCreateQuiz, ...props}) => 
         setNumberOfAnswers(+numberOfAnswers + 1)
     }
 
-    function deleteAnswerHandler(e) {
+    function deleteAnswerHandler(e, setFieldValue) {
         e.preventDefault()
         if (numberOfAnswers === 2) {return} // minimum number of answers
         setNumberOfAnswers(+numberOfAnswers - 1)
-        props.array.pop('Answer' + numberOfAnswers)
-        props.array.pop('Answer' + numberOfAnswers)
-    }
-
-    function addQuestionHandler() {
-        setTypeRequest('add')
-    }
-
-    function createQuizHandler() {
-        setTypeRequest('create')
+        setFieldValue("Answer" + numberOfAnswers, '')
     }
 
     function renderInputAnswers() {
@@ -56,12 +68,13 @@ const QuizCreatorBefore = ({createQuizQuestion, finishCreateQuiz, ...props}) => 
         for (let i = 1; i <= numberOfAnswers; i++) {
             arrayWithAnswer.push(i)
         }
+
         return arrayWithAnswer.map((item) => {
-            return (
-                <Field key={item} label={"Введите вариант ответа"} component={Input} name={"Answer" + item}
-                       validate={required}/>
-            )
-        })
+                return (
+                    <Field key={item} label={"Введите вариант ответа"} component={Input} name={"Answer" + item} />
+                )
+            })
+
     }
 
     function renderOptionsSelect() {
@@ -81,31 +94,33 @@ const QuizCreatorBefore = ({createQuizQuestion, finishCreateQuiz, ...props}) => 
                 successAddTest !== true ?
             <div>
                 <h1>Создайте тест</h1>
-
-                    <form onSubmit={props.handleSubmit}>
-
-                        <Field label={"Введите вопрос"} component={Input} name={"question"} validate={required}/>
-
-                        {renderInputAnswers()}
-
-                        <Field name={'rightAnswerId'} component={Select}>
-                            {renderOptionsSelect()}
-                        </Field>
-                        <div style={{display: 'flex', flexWrap: 'wrap'}}>
-                            <Button type="primary" onClick={(e) => addAnswerHandler(e)}>
-                                Добавить ответ
-                            </Button>
-                            <Button type="error" onClick={(e) => deleteAnswerHandler(e)}>
-                                Удалить ответ
-                            </Button>
-                            <Button type="primary" onClick={addQuestionHandler}>
-                                Добавить вопрос в тест
-                            </Button>
-                            <Button type="success" onClick={createQuizHandler}>
-                                Создать тест
-                            </Button>
-                        </div>
-                    </form>
+                <Formik
+                    initialValues={initialValues}
+                >
+                    {({values,resetForm, setFieldValue}) => (
+                        <Form className="AuthForm">
+                            <Field label={"Введите вопрос"} name={"question"} component={Input}></Field>
+                            {renderInputAnswers()}
+                            <Field name={'rightAnswerId'} component={Select}>
+                                {renderOptionsSelect()}
+                            </Field>
+                            <div style={{display: 'flex', flexWrap: 'wrap'}}>
+                                <Button uiType="primary" type={"button"} onClick={(e) => addAnswerHandler(e)}>
+                                    Добавить ответ
+                                </Button>
+                                <Button uiType="error" type={"button"} onClick={(e) => deleteAnswerHandler(e, setFieldValue)}>
+                                    Удалить ответ
+                                </Button>
+                                <Button uiType={"primary"} type={"button"} onClick={() => onSubmit(values, resetForm, "add")}>
+                                    Добавить вопрос в тест
+                                </Button>
+                                <Button uiType="success" type={"button"} onClick={() => onSubmit(values, resetForm, "create")}>
+                                    Создать тест
+                                </Button>
+                            </div>
+                        </Form>
+                    )}
+                </Formik>
             </div>
                     : <div>
                         <h1>Тест успешно загружен</h1>
@@ -114,37 +129,6 @@ const QuizCreatorBefore = ({createQuizQuestion, finishCreateQuiz, ...props}) => 
                 : <Loader/>}
         </div>
     )
-}
-
-const QuizCreatorFormContainer = reduxForm({
-    form: 'quizCreator'
-})(QuizCreatorBefore)
-
-const QuizCreator = (props) => {
-    let [data, setData] = useState(null)
-    const onSubmit = (formData) => {
-        let newFormData = {}
-        newFormData.answers = []
-        for (let item in formData) {
-            if (typeof formData[item] === 'string') {
-            	switch(item) {
-					case 'question':
-						newFormData[item] = formData[item]
-					case 'rightAnswerId':
-						newFormData[item] = +formData[item]
-					default:
-						let id = item.slice(-1)
-						newFormData.answers.push({id: id, text: formData[item]})
-				}
-            }
-        }
-        newFormData.id = props.quiz.length + 1
-        if (!newFormData.rightAnswerId) {
-            newFormData.rightAnswerId = 1
-        }
-        setData(newFormData)
-    }
-    return <QuizCreatorFormContainer onSubmit={onSubmit} deleteField={props.unregisterField} data={data} {...props}/>
 }
 
 function mapStateToProps(state) {
