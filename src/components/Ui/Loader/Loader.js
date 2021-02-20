@@ -1,9 +1,7 @@
-import React from 'react'
-import './Loader.css'
+import React from "react";
+import "./Loader.css";
 
-const Loader = props => {
-	return (
-		<div className="lds-dual-ring"></div>
-	)
-}
-export default Loader
+const Loader = (props) => {
+  return <div className="lds-dual-ring"></div>;
+};
+export default Loader;
