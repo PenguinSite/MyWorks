@@ -9,6 +9,7 @@
     "axios": "^0.19.2",
     "formik": "^2.1.4",
     "husky": "^5.0.9",
+    "lint-staged": "^10.5.4",
     "node-sass": "^4.14.1",
     "prettier": "^2.2.1",
     "react": "^16.13.1",
@@ -28,12 +29,6 @@
   },
   "eslintConfig": {
     "extends": "react-app"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "yarn prettify",
-      "pre-push": "yarn prettify"
-    }
   },
   "browserslist": {
     "production": [
